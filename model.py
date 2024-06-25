@@ -28,19 +28,25 @@ class model(nn.Module):
         self.scheduler = torch.optim.lr_scheduler.StepLR(self.optim, step_size = 1, gamma=lrDecay)
         
         self.loss_fn = nn.CrossEntropyLoss()
-        
+    
+    def Conv_Block(ins, out, k):
+        nn.Sequential(nn.Conv2d(ins, out , k), nn.ReLU(), nn.BatchNorm2d(), nn.Conv2d, nn.Conv2d(ins, out , k), nn.ReLU(), nn.BatchNorm2d(), nn.Conv2d, nn.Conv2d(ins, out , k), nn.ReLU(), nn.BatchNorm2d(), nn.Conv2d)
+
     def createVisualModel(self):
-        self.visualModel = nn.Sequential(nn.Flatten(), nn.Linear(112*112, 512), nn.ReLU(), nn.Linear(512, 256), nn.ReLU(), nn.Linear(256, 128))
+        #self.visualModel = nn.Sequential(nn.Flatten(), nn.Linear(112*112, 512), nn.ReLU(), nn.Linear(512, 256), nn.ReLU(), nn.Linear(256, 128))
+        self.visualModel = nn.Sequential(nn.Flatten(), self.Conv_Block(3,23,3), nn.MaxPool2d(2,(2,2)), self.Conv_Block(32,64,3), nn.MaxPool2d(2,(2,2)), self.Conv_Block(64,64,3), nn.MaxPool2d(2,(2,2)), self.Conv_Block(64,128,3),nn.Conv2d(64,12,3) )
 
     def createAudioModel(self):
-        self.audioModel = nn.Sequential(nn.Flatten(), nn.Linear(299*13, 512), nn.ReLU(), nn.Linear(512, 256), nn.ReLU(), nn.Linear(256, 128))
+        #self.audioModel = nn.Sequential(nn.Flatten(), nn.Linear(299*13, 512), nn.ReLU(), nn.Linear(512, 256), nn.ReLU(), nn.Linear(256, 128))
+        self.audioModel = nn.Sequential(nn.Flatten(), self.Conv_Block(1,32,3), nn.MaxPool2d(2,(2,1)), self.Conv_Block(32,64,3), nn.MaxPool2d(2,(2,1)), self.Conv_Block(64,64,3), nn.MaxPool2d(2,(2,1)), self.Conv_Block(64,64,3), nn.MaxPool2d(2,(2,1)), self.Conv_Block(64,128,3),nn.Conv2d(64,128,3) )
 
 
     def createFusionModel(self):
         pass
 
     def createFCModel(self):
-        self.fcModel = nn.Sequential(nn.Linear(256, 128), nn.ReLU(), nn.Linear(128,64), nn.ReLU(), nn.Linear(64, 2))
+        #self.fcModel = nn.Sequential(nn.Linear(256, 128), nn.ReLU(), nn.Linear(128,64), nn.ReLU(), nn.Linear(64, 2))
+        self.fcModel = nn.Sequential(nn.Linear(256,512), nn.ReLU(), nn.Dropout(.3), nn.Linear(512,128), nn.ReLU(), nn.Dropout(.3), nn.Linear(128,2))
     
     def train_network(self, loader, epoch, **kwargs):
         

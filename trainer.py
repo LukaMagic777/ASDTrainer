@@ -9,11 +9,11 @@ def parser():
 
     args.add_argument("--lr", type=float, default=0.0001, help="Learning Rate")
     args.add_argument('--lrDecay', type=float, default=0.95, help='Learning rate decay rate')
-    args.add_argument('--maxEpoch', type=int, default=25, help='Maximum number of epochs')
+    args.add_argument('--maxEpoch', type=int, default=10, help='Maximum number of epochs')
     args.add_argument('--testInterval', type=int, default=1, help='Test and save every [testInterval] epochs')
-    args.add_argument('--batchSize', type=int, default=32, help='Dynamic batch size, default is 500 frames.')
+    args.add_argument('--batchSize', type=int, default=128, help='Dynamic batch size, default is 500 frames.')
     args.add_argument('--nDataLoaderThread', type=int, default=4, help='Number of loader threads')
-    args.add_argument('--datasetPath', type=str, default="/mnt/data/datasets/AVDIAR_ASD/", help='Path to the ASD Dataset')
+    args.add_argument('--datasetPath', type=str, default="\Downloads\AVDIAR_ASD_FTLim\AVDIAR_ASD_FTLim", help='Path to the ASD Dataset')
     args.add_argument('--loadAudioSeconds', type=float, default=3, help='Number of seconds of audio to load for each training sample')
     args.add_argument('--loadNumImages', type=int, default=1, help='Number of images to load for each training sample')
     args.add_argument('--savePath', type=str, default="exps/exp1")
@@ -37,7 +37,7 @@ def main(args):
                         audioPath     = os.path.join(args.datasetPath , 'clips_audios'), \
                         visualPath    = os.path.join(args.datasetPath, 'clips_videos', args.evalDataType), \
                         **vars(args))
-    valLoader = torch.utils.data.DataLoader(loader, batch_size = args.batchSize, shuffle = False, num_workers = 16)
+    valLoader = torch.utils.data.DataLoader(loader, batch_size = args.batchSize, shuffle = False, num_workers = 4)
     
     if args.evaluation == True:
         s = model(**vars(args))
@@ -52,6 +52,7 @@ def main(args):
         print("mAP %2.2f%%"%(mAP))
         quit()    
     
+    # Either loads a previous checkpoint or starts training from scratch
     args.modelSavePath = os.path.join(args.savePath, 'model')
     os.makedirs(args.modelSavePath, exist_ok=True)
     args.scoreSavePath    = os.path.join(args.savePath, 'score.txt')
