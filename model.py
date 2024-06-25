@@ -29,7 +29,7 @@ class model(nn.Module):
         
         self.loss_fn = nn.CrossEntropyLoss()
     
-    def Conv_Block(ins, out, k):
+    def Conv_Block(self, ins, out, k):
         nn.Sequential(nn.Conv2d(ins, out , k), nn.ReLU(), nn.BatchNorm2d(), nn.Conv2d, nn.Conv2d(ins, out , k), nn.ReLU(), nn.BatchNorm2d(), nn.Conv2d, nn.Conv2d(ins, out , k), nn.ReLU(), nn.BatchNorm2d(), nn.Conv2d)
 
     def createVisualModel(self):
@@ -46,7 +46,7 @@ class model(nn.Module):
 
     def createFCModel(self):
         #self.fcModel = nn.Sequential(nn.Linear(256, 128), nn.ReLU(), nn.Linear(128,64), nn.ReLU(), nn.Linear(64, 2))
-        self.fcModel = nn.Sequential(nn.Linear(256,512), nn.ReLU(), nn.Dropout(.3), nn.Linear(512,128), nn.ReLU(), nn.Dropout(.3), nn.Linear(128,2))
+        self.fcModel = nn.Sequential(nn.Linear(256,512), nn.ReLU(), nn.Dropout(.3), nn.Linear(512,128), nn.ReLU(), nn.Dropout(.3), nn.Linear)
     
     def train_network(self, loader, epoch, **kwargs):
         
