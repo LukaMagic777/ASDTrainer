@@ -44,7 +44,7 @@ class model(nn.Module):
 
     def createFCModel(self):
         #self.fcModel = nn.Sequential(nn.Linear(256, 128), nn.ReLU(), nn.Linear(128,64), nn.ReLU(), nn.Linear(64, 2))
-        self.fcModel = nn.Sequential(nn.Linear(256,512), nn.ReLU(), nn.Dropout(.3), nn.Linear(512,128), nn.ReLU(), nn.Dropout(.3), nn.Linear)
+        self.fcModel = nn.Sequential(nn.Linear(256,512), nn.ReLU(), nn.Dropout(.3), nn.Linear(512,128), nn.ReLU(), nn.Dropout(.3), nn.Linear(128,2))
     
     def train_network(self, loader, epoch, **kwargs):
         
