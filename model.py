@@ -30,7 +30,7 @@ class model(nn.Module):
         self.loss_fn = nn.CrossEntropyLoss()
 
     def Conv_Block(self, Cin, Cout, k):
-        return nn.Sequential(nn.Conv2d(Cin, Cout,k), nn.ReLU(), nn.BatchNorm2d(Cout), nn.Conv2d(Cout, Cout,k), nn.ReLU(), nn.BatchNorm2d(Cout), nn.Conv2d(Cout, Cout,k), nn.ReLU(), nn.BatchNorm2d(Cout))
+        return nn.Sequential(nn.Conv2d(Cin, Cout,k,padding=1), nn.ReLU(), nn.BatchNorm2d(Cout), nn.Conv2d(Cout, Cout,k,padding=1), nn.ReLU(), nn.BatchNorm2d(Cout), nn.Conv2d(Cout, Cout,k,padding=1), nn.ReLU(), nn.BatchNorm2d(Cout))
 
     def createVisualModel(self):
         #self.visualModel = nn.Sequential(nn.Flatten(), nn.Linear(112*112, 512), nn.ReLU(), nn.Linear(512, 256), nn.ReLU(), nn.Linear(256, 128))
