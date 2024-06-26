@@ -36,31 +36,31 @@ class model(nn.Module):
         #self.visualModel = nn.Sequential(nn.Flatten(), nn.Linear(112*112, 512), nn.ReLU(), nn.Linear(512, 256), nn.ReLU(), nn.Linear(256, 128))
         #Conv_Block(3, 32, 3), MP2D(2, (2,2)), Conv_Block(32, 64, 3), MP2D(2, (2,2)), Conv_Block(64, 64, 3), MP2D(2, (2,2)), Conv_Block_Last(64, 128,3)
         self.visualModel = nn.Sequential(
-                                        self.Conv_Block(3,32,3), 
-                                        nn.MaxPool2d(2,(2,2)),
-                                        self.Conv_Block(32,64,3), 
-                                        nn.MaxPool2d(2,(2,2)),
-                                        self.Conv_Block(64,64,3), 
-                                        nn.MaxPool2d(2,(2,2)),
-                                        self.Conv_Block(64,128,3),
-                                        nn.Conv2d(64,128,3)
-                                        )
+            self.Conv_Block(3, 32, 3),              # Output: 32 x 224 x 224
+            nn.MaxPool2d(2, (2, 2)),                # Output: 32 x 112 x 112
+            self.Conv_Block(32, 64, 3),             # Output: 64 x 112 x 112
+            nn.MaxPool2d(2, (2, 2)),                # Output: 64 x 56 x 56
+            self.Conv_Block(64, 64, 3),             # Output: 64 x 56 x 56
+            nn.MaxPool2d(2, (2, 2)),                # Output: 64 x 28 x 28
+            self.Conv_Block(64, 128, 3),            # Output: 128 x 28 x 28
+            nn.Conv2d(128, 128, 3)                  # Output: 128 x 26 x 26 (since no padding, kernel size 3 reduces each dim by 2)
+            )
 
     def createAudioModel(self):
         #self.audioModel = nn.Sequential(nn.Flatten(), nn.Linear(299*13, 512), nn.ReLU(), nn.Linear(512, 256), nn.ReLU(), nn.Linear(256, 128))
         # Conv_Block(1, 32, 3), MP2D(2, (2,1)), Conv_Block(32, 64, 3), MP2D(2, (2,1)),Conv_Block(64, 64, 3), MP2D(2, (2,1)), Conv_Block(64, 64, 3), MP2D(2, (2,2)), Conv_Block_Last(64,128,3)
         self.audioModel = nn.Sequential(
-                                        self.Conv_Block(1,32,3), 
-                                        nn.MaxPool2d(2,(2,1)),
-                                        self.Conv_Block(32,64,3), 
-                                        nn.MaxPool2d(2,(2,1)),
-                                        self.Conv_Block(64,64,3), 
-                                        nn.MaxPool2d(2,(2,1)),
-                                        self.Conv_Block(64,64,3), 
-                                        nn.MaxPool2d(2,(2,2)),
-                                        self.Conv_Block(64,128,3),
-                                        nn.Conv2d(64,128,3)
-                                        )
+            self.Conv_Block(1, 32, 3),              # Output: 32 x 299 x 13
+            nn.MaxPool2d(2, (2, 1)),                # Output: 32 x 149 x 13
+            self.Conv_Block(32, 64, 3),             # Output: 64 x 149 x 13
+            nn.MaxPool2d(2, (2, 1)),                # Output: 64 x 74 x 13
+            self.Conv_Block(64, 64, 3),             # Output: 64 x 74 x 13
+            nn.MaxPool2d(2, (2, 1)),                # Output: 64 x 37 x 13
+            self.Conv_Block(64, 64, 3),             # Output: 64 x 37 x 13
+            nn.MaxPool2d(2, (2, 2)),                # Output: 64 x 18 x 6
+            self.Conv_Block(64, 128, 3),            # Output: 128 x 18 x 6
+            nn.Conv2d(128, 128, 3)                  # Output: 128 x 16 x 4 (since no padding, kernel size 3 reduces each dim by 2)
+        )
 
 
 
