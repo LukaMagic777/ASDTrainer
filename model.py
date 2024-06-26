@@ -36,7 +36,7 @@ class model(nn.Module):
         #self.visualModel = nn.Sequential(nn.Flatten(), nn.Linear(112*112, 512), nn.ReLU(), nn.Linear(512, 256), nn.ReLU(), nn.Linear(256, 128))
         #Conv_Block(3, 32, 3), MP2D(2, (2,2)), Conv_Block(32, 64, 3), MP2D(2, (2,2)), Conv_Block(64, 64, 3), MP2D(2, (2,2)), Conv_Block_Last(64, 128,3)
         self.visualModel = nn.Sequential(
-            self.Conv_Block(3, 32, 3),              # Output: 32 x 224 x 224
+            self.Conv_Block(1, 32, 3),              # Output: 32 x 224 x 224
             nn.MaxPool2d(2, (2, 2)),                # Output: 32 x 112 x 112
             self.Conv_Block(32, 64, 3),             # Output: 64 x 112 x 112
             nn.MaxPool2d(2, (2, 2)),                # Output: 64 x 56 x 56
