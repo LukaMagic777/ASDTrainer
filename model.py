@@ -29,13 +29,38 @@ class model(nn.Module):
         
         self.loss_fn = nn.CrossEntropyLoss()
 
+    def Conv_Block(self, Cin, Cout, k):
+        nn.Sequential(nn.Conv2d(Cin, Cout,k), nn.ReLU(), nn.BatchNorm2d(Cout), nn.Conv2d(Cout, Cout,k), nn.ReLU(), nn.BatchNorm2d(Cout), nn.Conv2d(Cout, Cout,k), nn.ReLU(), nn.BatchNorm2d(Cout))
+
     def createVisualModel(self):
         #self.visualModel = nn.Sequential(nn.Flatten(), nn.Linear(112*112, 512), nn.ReLU(), nn.Linear(512, 256), nn.ReLU(), nn.Linear(256, 128))
-        self.visualModel = nn.Sequential(nn.Conv2d(3, 32 , 3), nn.ReLU(), nn.BatchNorm2d(32), nn.Conv2d(3, 32 , 3), nn.ReLU(), nn.BatchNorm2d(32),nn.Conv2d(3, 32 , 3), nn.ReLU(), nn.BatchNorm2d(32), nn.MaxPool2d(2,(2,2)), nn.Conv2d(32, 64 , 3), nn.ReLU(), nn.BatchNorm2d(64), nn.Conv2d(32, 64 , 3), nn.ReLU(), nn.BatchNorm2d(64),nn.Conv2d(32, 64 , 3), nn.ReLU(), nn.BatchNorm2d(64), nn.MaxPool2d(2,(2,2)), nn.Conv2d(64, 64 , 3), nn.ReLU(), nn.BatchNorm2d(64), nn.Conv2d(64, 64 , 3), nn.ReLU(), nn.BatchNorm2d(64),nn.Conv2d(64, 64 , 3), nn.ReLU(), nn.BatchNorm2d(64), nn.MaxPool2d(2,(2,2)), nn.Conv2d(64, 128 , 3), nn.ReLU(), nn.BatchNorm2d(128), nn.Conv2d(64, 128 , 3), nn.ReLU(), nn.BatchNorm2d(128),nn.Conv2d(64, 128 , 3), nn.ReLU(), nn.BatchNorm2d(128), nn.Conv2d(64,128,3))
+        #Conv_Block(3, 32, 3), MP2D(2, (2,2)), Conv_Block(32, 64, 3), MP2D(2, (2,2)), Conv_Block(64, 64, 3), MP2D(2, (2,2)), Conv_Block_Last(64, 128,3)
+        self.visualModel = nn.Sequential(
+                                        self.Conv_Block(3,32,3), 
+                                        nn.MaxPool2d(2,(2,2)),
+                                        self.Conv_Block(32,64,3), 
+                                        nn.MaxPool2d(2,(2,2)),
+                                        self.Conv_Block(64,64,3), 
+                                        nn.MaxPool2d(2,(2,2)),
+                                        self.Conv_Block(64,128,3),
+                                        nn.Conv2d(64,128,3)
+                                        )
 
     def createAudioModel(self):
         #self.audioModel = nn.Sequential(nn.Flatten(), nn.Linear(299*13, 512), nn.ReLU(), nn.Linear(512, 256), nn.ReLU(), nn.Linear(256, 128))
-        self.audioModel = nn.Sequential(nn.Conv2d(1, 32 , 3), nn.ReLU(), nn.BatchNorm2d(32), nn.Conv2d(1, 32 , 3), nn.ReLU(), nn.BatchNorm2d(32),nn.Conv2d(1, 32 , 3), nn.ReLU(), nn.BatchNorm2d(32), nn.MaxPool2d(2,(2,1)), nn.Conv2d(32, 64 , 3), nn.ReLU(), nn.BatchNorm2d(64), nn.Conv2d(32, 64 , 3), nn.ReLU(), nn.BatchNorm2d(64),nn.Conv2d(32, 64 , 3), nn.ReLU(), nn.BatchNorm2d(64), nn.MaxPool2d(2,(2,1)), nn.Conv2d(64, 64 , 3), nn.ReLU(), nn.BatchNorm2d(64), nn.Conv2d(64, 64 , 3), nn.ReLU(), nn.BatchNorm2d(64),nn.Conv2d(64, 64 , 3), nn.ReLU(), nn.BatchNorm2d(64), nn.MaxPool2d(2,(2,1)), nn.Conv2d(64, 64 , 3), nn.ReLU(), nn.BatchNorm2d(64), nn.Conv2d(64, 64 , 3), nn.ReLU(), nn.BatchNorm2d(64),nn.Conv2d(64, 64 , 3), nn.ReLU(), nn.BatchNorm2d(64), nn.MaxPool2d(2,(2,2)), nn.Conv2d(64, 128 , 3), nn.ReLU(), nn.BatchNorm2d(128), nn.Conv2d(64, 128 , 3), nn.ReLU(), nn.BatchNorm2d(128),nn.Conv2d(64, 128 , 3), nn.ReLU(), nn.BatchNorm2d(128), nn.Conv2d(64,128,3))
+        # Conv_Block(1, 32, 3), MP2D(2, (2,1)), Conv_Block(32, 64, 3), MP2D(2, (2,1)),Conv_Block(64, 64, 3), MP2D(2, (2,1)), Conv_Block(64, 64, 3), MP2D(2, (2,2)), Conv_Block_Last(64,128,3)
+        self.audioModel = nn.Sequential(
+                                        self.Conv_Block(1,32,3), 
+                                        nn.MaxPool2d(2,(2,1)),
+                                        self.Conv_Block(32,64,3), 
+                                        nn.MaxPool2d(2,(2,1)),
+                                        self.Conv_Block(64,64,3), 
+                                        nn.MaxPool2d(2,(2,1)),
+                                        self.Conv_Block(64,64,3), 
+                                        nn.MaxPool2d(2,(2,2)),
+                                        self.Conv_Block(64,128,3),
+                                        nn.Conv2d(64,128,3)
+                                        )
 
 
 
