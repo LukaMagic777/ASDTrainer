@@ -13,7 +13,8 @@ class model(nn.Module):
         self.fusionModel = None
         self.fcModel = None
 
-        self.device='cpu'
+        #self.device='cpu'
+        self.device = ("cuda" if torch.cuda.is_available() else "cpu")
 
         self.createVisualModel()
         self.createAudioModel()
