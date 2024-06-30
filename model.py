@@ -43,7 +43,8 @@ class model(nn.Module):
             self.Conv_Block(64, 64, 3),             # Output: 64 x 56 x 56
             nn.MaxPool2d(2, (2, 2)),                # Output: 64 x 28 x 28
             self.Conv_Block(64, 128, 3),            # Output: 128 x 28 x 28
-            nn.Conv2d(128, 128, 3)                  # Output: 128 x 26 x 26 (since no padding, kernel size 3 reduces each dim by 2)
+            nn.Conv2d(128, 128, 3),                  # Output: 128 x 26 x 26 (since no padding, kernel size 3 reduces each dim by 2)
+            nn.Flatten()
             )
 
     def createAudioModel(self):
@@ -59,7 +60,8 @@ class model(nn.Module):
             self.Conv_Block(64, 64, 3),             # Output: 64 x 37 x 13
             nn.MaxPool2d(2, (2, 2)),                # Output: 64 x 18 x 6
             self.Conv_Block(64, 128, 3),            # Output: 128 x 18 x 6
-            nn.Conv2d(128, 128, 3)                  # Output: 128 x 16 x 4 (since no padding, kernel size 3 reduces each dim by 2)
+            nn.Conv2d(128, 128, 3),                  # Output: 128 x 16 x 4 (since no padding, kernel size 3 reduces each dim by 2)
+            nn.Flatten()
         )
 
 
@@ -71,7 +73,7 @@ class model(nn.Module):
 
     def createFCModel(self):
         #self.fcModel = nn.Sequential(nn.Linear(256, 128), nn.ReLU(), nn.Linear(128,64), nn.ReLU(), nn.Linear(64, 2))
-        self.fcModel = nn.Sequential(nn.Linear(256,512), nn.ReLU(), nn.Dropout(.3), nn.Linear(512,128), nn.ReLU(), nn.Dropout(.3), nn.Linear(128,2))
+        self.fcModel = nn.Sequential(nn.Linear(24576,512), nn.ReLU(), nn.Dropout(.3), nn.Linear(512,128), nn.ReLU(), nn.Dropout(.3), nn.Linear(128,2))
     
     def train_network(self, loader, epoch, **kwargs):
         
