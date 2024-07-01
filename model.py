@@ -6,6 +6,8 @@ import time, tqdm
 from torchvision import models
 import torchvggish
 
+import soundfile as sf
+
 class model(nn.Module):
     def __init__(self, lr=0.0001, lrDecay=0.95, **kwargs):
         super(model, self).__init__()
@@ -36,35 +38,19 @@ class model(nn.Module):
         return nn.Sequential(nn.Conv2d(Cin, Cout,k,padding=1), nn.ReLU(), nn.BatchNorm2d(Cout), nn.Conv2d(Cout, Cout,k,padding=1), nn.ReLU(), nn.BatchNorm2d(Cout), nn.Conv2d(Cout, Cout,k,padding=1), nn.ReLU(), nn.BatchNorm2d(Cout))
 
     def createVisualModel(self):
-        #self.visualModel = nn.Sequential(nn.Flatten(), nn.Linear(112*112, 512), nn.ReLU(), nn.Linear(512, 256), nn.ReLU(), nn.Linear(256, 128))
-        #Conv_Block(3, 32, 3), MP2D(2, (2,2)), Conv_Block(32, 64, 3), MP2D(2, (2,2)), Conv_Block(64, 64, 3), MP2D(2, (2,2)), Conv_Block_Last(64, 128,3)
         vgg = models.vgg16(pretrained=True)
-        # Modify the first convolutional layer to accept single-channel input
         vgg.features[0] = nn.Conv2d(1, 64, kernel_size=3, stride=1, padding=1)
-        # Remove the classifier (last fully connected layers) from VGG16
         vgg = nn.Sequential(*list(vgg.features.children()))
         self.visualModel = nn.Sequential(vgg, nn.Flatten())
 
     def createAudioModel(self):
-        # Adjusting Conv2d and MaxPool2d to prevent dimensions from going to zero
-        self.audioModel = nn.Sequential(
-            nn.Conv2d(1, 64, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2)),  # Reduces to (256, 18)
-            nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=(2, 1), stride=(2, 1)),  # Reduces to (128, 18) 
-            nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2)),  # Reduces to (64, 9)
-            nn.Conv2d(256, 512, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=(2, 1), stride=(2, 1)),  # Reduces to (32, 9)
-            nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1),
-            nn.ReLU(inplace=True),
-            nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2)),  # Reduces to (16, 4)
-            nn.Flatten()
-        )
+        vggish = torchvggish.vggish()
+        vggish.features[2] = nn.MaxPool2d(2,2,1,1,False)
+        vggish.features[5] = nn.MaxPool2d(2,2,1,1,False)
+        vggish.features[10] = nn.MaxPool2d(2,2,1,1,False)
+        vggish.features[15] = nn.MaxPool2d(2,2,1,1,False)
+        vggish = nn.Sequential(*list(vggish.features.children()), nn.Flatten())
+        self.audioModel = nn.Sequential(vggish)
 
 
 
@@ -75,11 +61,15 @@ class model(nn.Module):
 
     def createFCModel(self):
         #self.fcModel = nn.Sequential(nn.Linear(256, 128), nn.ReLU(), nn.Linear(128,64), nn.ReLU(), nn.Linear(64, 2))
-        self.fcModel = nn.Sequential(nn.Linear(9216,512), nn.ReLU(), nn.Dropout(.3), nn.Linear(512,128), nn.ReLU(), nn.Dropout(.3), nn.Linear(128,2))
+        self.fcModel = nn.Sequential(nn.Linear(25088,512), nn.ReLU(), nn.Dropout(.3), nn.Linear(512,128), nn.ReLU(), nn.Dropout(.3), nn.Linear(128,2))
+
+
 
     
     def train_network(self, loader, epoch, **kwargs):
-        
+        vggish = torchvggish.vggish()
+        vggish = nn.Sequential(*list(vggish.features.children()))
+        print(vggish)
         self.train()
         self.scheduler.step(epoch-1)
         lr = self.optim.param_groups[0]['lr']
