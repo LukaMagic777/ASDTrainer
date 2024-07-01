@@ -3,6 +3,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import time, tqdm
+from torchvision import models
+import torchvggish
 
 class model(nn.Module):
     def __init__(self, lr=0.0001, lrDecay=0.95, **kwargs):
@@ -36,32 +38,31 @@ class model(nn.Module):
     def createVisualModel(self):
         #self.visualModel = nn.Sequential(nn.Flatten(), nn.Linear(112*112, 512), nn.ReLU(), nn.Linear(512, 256), nn.ReLU(), nn.Linear(256, 128))
         #Conv_Block(3, 32, 3), MP2D(2, (2,2)), Conv_Block(32, 64, 3), MP2D(2, (2,2)), Conv_Block(64, 64, 3), MP2D(2, (2,2)), Conv_Block_Last(64, 128,3)
-        self.visualModel = nn.Sequential(
-            self.Conv_Block(1, 32, 3),              # Output: 32 x 224 x 224
-            nn.MaxPool2d(2, (2, 2)),                # Output: 32 x 112 x 112
-            self.Conv_Block(32, 64, 3),             # Output: 64 x 112 x 112
-            nn.MaxPool2d(2, (2, 2)),                # Output: 64 x 56 x 56
-            self.Conv_Block(64, 64, 3),             # Output: 64 x 56 x 56
-            nn.MaxPool2d(2, (2, 2)),                # Output: 64 x 28 x 28
-            self.Conv_Block(64, 128, 3),            # Output: 128 x 28 x 28
-            nn.Conv2d(128, 128, 3),                  # Output: 128 x 26 x 26 (since no padding, kernel size 3 reduces each dim by 2)
-            nn.Flatten()
-            )
+        vgg = models.vgg16(pretrained=True)
+        # Modify the first convolutional layer to accept single-channel input
+        vgg.features[0] = nn.Conv2d(1, 64, kernel_size=3, stride=1, padding=1)
+        # Remove the classifier (last fully connected layers) from VGG16
+        vgg = nn.Sequential(*list(vgg.features.children()))
+        self.visualModel = nn.Sequential(vgg, nn.Flatten())
 
     def createAudioModel(self):
-        #self.audioModel = nn.Sequential(nn.Flatten(), nn.Linear(299*13, 512), nn.ReLU(), nn.Linear(512, 256), nn.ReLU(), nn.Linear(256, 128))
-        # Conv_Block(1, 32, 3), MP2D(2, (2,1)), Conv_Block(32, 64, 3), MP2D(2, (2,1)),Conv_Block(64, 64, 3), MP2D(2, (2,1)), Conv_Block(64, 64, 3), MP2D(2, (2,2)), Conv_Block_Last(64,128,3)
+        # Adjusting Conv2d and MaxPool2d to prevent dimensions from going to zero
         self.audioModel = nn.Sequential(
-            self.Conv_Block(1, 32, 3),              # Output: 32 x 299 x 13
-            nn.MaxPool2d(2, (2, 1)),                # Output: 32 x 149 x 13
-            self.Conv_Block(32, 64, 3),             # Output: 64 x 149 x 13
-            nn.MaxPool2d(2, (2, 1)),                # Output: 64 x 74 x 13
-            self.Conv_Block(64, 64, 3),             # Output: 64 x 74 x 13
-            nn.MaxPool2d(2, (2, 1)),                # Output: 64 x 37 x 13
-            self.Conv_Block(64, 64, 3),             # Output: 64 x 37 x 13
-            nn.MaxPool2d(2, (2, 2)),                # Output: 64 x 18 x 6
-            self.Conv_Block(64, 128, 3),            # Output: 128 x 18 x 6
-            nn.Conv2d(128, 128, 3),                  # Output: 128 x 16 x 4 (since no padding, kernel size 3 reduces each dim by 2)
+            nn.Conv2d(1, 64, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2)),  # Reduces to (256, 18)
+            nn.Conv2d(64, 128, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=(2, 1), stride=(2, 1)),  # Reduces to (128, 18) 
+            nn.Conv2d(128, 256, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2)),  # Reduces to (64, 9)
+            nn.Conv2d(256, 512, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=(2, 1), stride=(2, 1)),  # Reduces to (32, 9)
+            nn.Conv2d(512, 512, kernel_size=3, stride=1, padding=1),
+            nn.ReLU(inplace=True),
+            nn.MaxPool2d(kernel_size=(2, 2), stride=(2, 2)),  # Reduces to (16, 4)
             nn.Flatten()
         )
 
@@ -74,7 +75,8 @@ class model(nn.Module):
 
     def createFCModel(self):
         #self.fcModel = nn.Sequential(nn.Linear(256, 128), nn.ReLU(), nn.Linear(128,64), nn.ReLU(), nn.Linear(64, 2))
-        self.fcModel = nn.Sequential(nn.Linear(24576,512), nn.ReLU(), nn.Dropout(.3), nn.Linear(512,128), nn.ReLU(), nn.Dropout(.3), nn.Linear(128,2))
+        self.fcModel = nn.Sequential(nn.Linear(9216,512), nn.ReLU(), nn.Dropout(.3), nn.Linear(512,128), nn.ReLU(), nn.Dropout(.3), nn.Linear(128,2))
+
     
     def train_network(self, loader, epoch, **kwargs):
         
