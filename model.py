@@ -67,9 +67,6 @@ class model(nn.Module):
 
     
     def train_network(self, loader, epoch, **kwargs):
-        vggish = torchvggish.vggish()
-        vggish = nn.Sequential(*list(vggish.features.children()))
-        print(vggish)
         self.train()
         self.scheduler.step(epoch-1)
         lr = self.optim.param_groups[0]['lr']
